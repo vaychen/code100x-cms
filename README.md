@@ -153,25 +153,7 @@ For normal development work, contributors should use feature branches and pull r
 
 ### Setup for this project
 
-#### 1) Add upstream and sync the fork
-
-```bash
-git remote add upstream https://github.com/code100x/cms.git
-git fetch upstream
-
-git checkout main
-git pull --ff-only upstream/main
-git push origin main
-```
-
-#### 2) Create the shared base branch
-
-```bash
-git checkout -b develop
-git push -u origin develop
-```
-
-#### 3) Each developer creates their own feature branch
+#### 1) Each developer creates their own feature branch
 
 For `vaychen`:
 
