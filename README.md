@@ -2,6 +2,20 @@
 
 Open source repo for app.100xdevs.com
 
+## Recommendation develop tool
+
+| Area | Recommendation | Why it fits this repo |
+| --- | --- | --- |
+| Runtime / local services | Docker or Docker Desktop | This repo includes Docker setup for PostgreSQL and app services via `docker-compose.yml` and `setup.sh`. |
+| IDE | VS Code | Best fit for a Next.js + TypeScript + Prisma + Tailwind project with Git integration and terminal support. |
+| AI coding support | GitHub Copilot and similar AI tools | Helpful for code understanding, refactoring, repetitive task generation, and PR review assistance. |
+| Version control | Git + GitHub | Required for fork workflow, PRs, branch protection, and team collaboration. |
+| Package manager | pnpm | This project explicitly uses pnpm in `package.json` and setup instructions. |
+| Database tooling | PostgreSQL client / DB UI | Useful for inspecting local data during Prisma and app development. |
+| Terminal / debugging | zsh or VS Code terminal + browser dev tools | Needed for running dev scripts, logs, and frontend debugging. |
+
+Suggested stack: Docker + VS Code + GitHub Copilot + pnpm + GitHub workflow.
+
 ## Running Locally
 
 > [!NOTE]  
@@ -18,6 +32,20 @@ git clone https://github.com/code100x/cms.git
 ```bash
 cd cms
 ```
+
+# Docker Compose Setup (Recommended)
+
+Use the project container setup for the cleanest local development workflow:
+
+```bash
+docker compose up --build
+```
+
+This starts the app and PostgreSQL services defined in `docker-compose.yml`.
+
+> [!TIP]
+> This is the recommended setup when you want to avoid installing project dependencies directly on your Mac host.
+
 # Instant Docker Setup
 
 > [!NOTE]  
@@ -25,7 +53,7 @@ cd cms
 
 1. Running Script for Instant setup
 
-```
+```bash
 # Gives permission to execute a setup file
 chmod +x setup.sh
 
@@ -47,12 +75,9 @@ docker run -d \
 postgres
 ``` 
 
-
-
 1. Create a .env file:
 
    - Copy `.env.example` and rename it to `.env`.
-
 
 2. Install dependencies:
 
@@ -100,45 +125,126 @@ http://localhost:3000
 
 ## Contributing
 
-We welcome contributions from the community! There are many ways to contribute to the CMS. Code is just one possible means of contribution.
+This repository is configured as a fork workflow for a small team working from different machines. The official source repository remains the upstream project, while this fork is the working repo for the team.
 
-### To contribute follow these steps:
+### Repository roles
 
-1. [Fork the repository](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/fork-a-repo).
+- `upstream` = source repository: `https://github.com/code100x/cms.git`
+- `origin` = this fork repo
+- `develop` = shared integration branch for pull requests
+- `feature/developer-chen` = branch for `vaychen`
+- `feature/developer-dai` = branch for `daiwei2026`
 
-2. Clone the fork to your local machine:
+> This documentation describes the project-level contribution model for the repository admin and team members. Certain repository maintenance actions are limited to the project admin.
+
+### Recommended branch strategy
+
+Use this flow in the current setup:
+
+1. Keep `main` synced with upstream
+2. Create a `develop` branch from the latest `main`
+3. Each developer creates a feature branch from `develop`
+4. Open pull requests to `develop`, not directly to `main`
+5. Periodically sync `main` into `develop`
+6. Merge `develop` into `main` only when the shared branch is stable and ready
+
+This keeps the project stable while still allowing multiple developers to work in parallel.
+
+### Admin-only repository operations
+
+The following actions are reserved for the project admin and should not be performed by ordinary contributors such as `daiwei2026`:
+
+- update or push directly to `develop`
+- sync `main` from `upstream/main`
+- merge upstream changes into the fork `main`
+- manage protected branch rules and repo permissions
+- perform other repo maintenance actions that affect repository-level governance
+
+For normal development work, contributors should use feature branches and pull requests only.
+
+### Setup for this project
+
+#### 1) Each developer creates their own feature branch
+
+For `vaychen`:
 
 ```bash
-git clone https://github.com/<your username>/cms.git
-cd cms
+git checkout develop
+git pull origin develop
+git checkout -b feature/developer-chen
+git push -u origin feature/developer-chen
 ```
 
-3. Create a new branch
+For `daiwei2026`:
 
 ```bash
-git checkout -b feature/fooBar
+git checkout develop
+git pull origin develop
+git checkout -b feature/developer-dai
+git push -u origin feature/developer-dai
 ```
 
-4. Make your changes and commit them
+When working on different machines (Mac, Windows, Linux), each developer should keep their local branch updated from the shared remote branch:
 
 ```bash
-git commit -am 'Add some fooBar'
+git fetch origin
+git checkout develop
+git pull origin develop
 ```
 
-5. Push to the branch
+### Pull request workflow
+
+- Developer creates a feature branch from `develop`
+- Developer pushes the branch to `origin`
+- Developer opens a PR to `develop`
+- Reviewer approves the PR
+- Merge into `develop`
+
+This means the shared review branch is always the base, and `main` stays clean and mostly synchronized with upstream.
+
+### Updating from upstream main
+
+When the upstream project updates, pull the latest changes into your fork main and then bring them into `develop`:
 
 ```bash
-git push origin feature/fooBar
+git fetch upstream
+git checkout main
+git merge --ff-only upstream/main
+git push origin main
+
+git checkout develop
+git merge origin/main
+git push origin develop
 ```
 
-6. Go to [the repository](https://github.com/code100x/cms/pulls) and [make a Pull Request](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
+This keeps the shared branch aligned with the latest source project updates without losing work in feature branches.
 
-> For major changes, please open an issue first to discuss what you would like to change.
+### Branch protection recommendation
 
-Read our [contribution guidelines](./CONTRIBUTING.md) for more details.
+To keep the PR flow reliable, protect the shared branch in GitHub. In this project, the branch protection rule name is set as:
 
-## Contributors
+- `develop-branch-pr-requirements`
 
-<a  href="https://github.com/code100x/cms/graphs/contributors">
-<img  src="https://contrib.rocks/image?repo=code100x/cms&max=400&columns=20"  />
-</a>
+This rule is intended for the repository admin to enforce the shared review process for `develop`.
+
+The expected configuration for this rule is:
+
+- require a pull request before merging
+- require at least 1 approval
+- dismiss stale approvals on new commits
+- require status checks to pass before merging
+- require branch to be up to date before merging
+- restrict direct pushes to protected branches
+
+This ensures that `develop` is only updated through reviewed pull requests and that maintenance actions remain controlled by the admin.
+
+### Notes for contributors
+
+- Do not push directly to `main` unless you are intentionally syncing from upstream and you are the designated admin
+- Do not open PRs directly to `main` for normal feature work
+- Feature branches should be short-lived and merged back into `develop`
+- Keep `develop` fresh by merging `main` regularly under admin control
+- Ordinary contributors such as `daiwei2026` should not perform admin-level repository maintenance actions
+
+> Suggested development setup: use VS Code as the shared IDE for this project so both developers can work in the same editor environment, keep consistent project settings, and use the Git integration cleanly for branch management and PR review.
+
