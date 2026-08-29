@@ -32,6 +32,20 @@ git clone https://github.com/code100x/cms.git
 ```bash
 cd cms
 ```
+
+# Docker Compose Setup (Recommended)
+
+Use the project container setup for the cleanest local development workflow:
+
+```bash
+docker compose up --build
+```
+
+This starts the app and PostgreSQL services defined in `docker-compose.yml`.
+
+> [!TIP]
+> This is the recommended setup when you want to avoid installing project dependencies directly on your Mac host.
+
 # Instant Docker Setup
 
 > [!NOTE]  
@@ -39,7 +53,7 @@ cd cms
 
 1. Running Script for Instant setup
 
-```
+```bash
 # Gives permission to execute a setup file
 chmod +x setup.sh
 
@@ -61,12 +75,9 @@ docker run -d \
 postgres
 ``` 
 
-
-
 1. Create a .env file:
 
    - Copy `.env.example` and rename it to `.env`.
-
 
 2. Install dependencies:
 
